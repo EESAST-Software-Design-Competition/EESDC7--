@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      // MathJax Config
+      MathJax = {
+        chtml: {
+          displayAlign: "left",
+        },
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        svg: {
+          fontCache: "global",
+        },
+      };
+      const Info = {
+        user_id: "{{user}}",
+        room_id: "{{url}}",
+        room_name: "{{name}}",
+      };
+    </script>
+    <script
+      id="MathJax-script"
+      src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    ></script>
+    <title>大概是公式机器</title>
+  </head>
+  <body x-data="App" :style="`--my-color: ${colorFromId(user_id)}`">
+    <main>
+      <div class="search" x-data="SearchBar">
+        <input
+          class="search__input"
+          type="text"
+          x-model="filter"
+          @input.debounce.300="setFiltered"
+        />
+        <div class="search__list">
+          <template x-for="entry in filtered" :key="entry.time">
+            <div
+              class="entry"
+              :class="isDraft && 'entry--draft'"
+              x-data="Entry(entry)"
+              :style="`--user-color: ${color}`"
+            >
+              <div class="entry__container">
+                <div class="entry__status">
+                  <span x-text="name">name here</span>@
+                  <span x-text="editor">Editor here</span>:
+                  <time x-text="time"></time>
+                </div>
+                <div
+                  class="entry__content content"
+                  x-html="html"
+                  x-init="$nextTick(() => typesetEl($el))"
+                ></div>
+              </div>
+              <button
+                class="entry__button"
+                x-data="{disabled: false}"
+                @click="disabled=true; addSelf().finally(() => disabled=false)"
+                x-text="disabled?'!':'»'"
+                :disabled="disabled"
+              >
+                »
+              </button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="stack">
+        <div x-data="{name: '', disabled: false}" class="stack__operation">
+          <button
+            class="stack__button"
+            @click="disabled=true; addEntry(name).then(() => name='').finally(() => disabled=false)"
+            :disabled="disabled"
+            x-text="disabled?'提交中...':'新建'"
+          >
+            新建
+          </button>
+        </div>
+        <div class="stack__list">
+          <template x-for="entry in stack.slice().reverse()" :key="entry.time">
+            <div
+              class="editor"
+              x-data="Editor(entry)"
+              @keydown.ctrl.enter="submitting=true; submitSelf().finally(() => submitting=false)"
+            >
+              <div class="editor__entry">
+                <button
+                  class="editor__button editor__button--left"
+                  @click="submitting=true; submitSelf().finally(() => submitting=false)"
+                  x-text="submitting?'«':'✓'"
+                  :disabled="submitting"
+                >
+                  ✓
+                </button>
+                <div class="editor__container">
+                  <div class="editor__status">
+                    <span>
+                      <input class="editor__name" type="text" x-model="name" />
+                    </span>
+                    :
+                    <time x-text="time"></time>
+                  </div>
+                  <div
+                    class="editor__content content"
+                    x-html="html"
+                    x-ref="display"
+                  ></div>
+                </div>
+                <button
+                  class="editor__button editor__button--right"
+                  x-data="{disabled: false}"
+                  @click="disabled=true; deleteSelf().finally(() => disabled=false)"
+                  x-text="disabled?'🗑️':'✕'"
+                  :disabled="disabled"
+                >
+                  ✕
+                </button>
+              </div>
+              <textarea
+                x-data="{
+                  resize(){$el.style.height='0px';$el.style.height=$el.scrollHeight+5+'px'},
+                  rendered: false,
+                }"
+                x-init="$nextTick(async()=>{resize();await render();await typesetEl($refs.display);rendered=true})"
+                @input="resize"
+                @click.outside="$nextTick(async () => {if(rendered)return; await render();await typesetEl($refs.display);rendered=true})"
+                @input.debounce.300="$nextTick(async () => {await render();typesetEl($refs.display)})"
+                x-model="text"
+                class="editor__text"
+              ></textarea>
+            </div>
+          </template>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <div x-data="{open: false}" class="user-list">
+        <ul x-show="open" class="user-list__list">
+          <template x-for="user in users">
+            <li :style="`color:${user.color};`">
+              @<span
+                :style="user.id == user_id && 'text-decoration: wavy underline'"
+                x-text="user.name"
+              ></span>
+            </li>
+          </template>
+        </ul>
+        <button @click="open=!open" class="user-list__button">
+          <span x-text="open?'»':'«'">«</span>
+          <span x-text="users.length"></span> Users #<span
+            x-text="room_name"
+          ></span>
+        </button>
+      </div>
+    </footer>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

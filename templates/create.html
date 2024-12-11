@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <title>敲黑板</title>
+    <style>
+      :root {
+        --f1: min(20vw, 25vh);
+        --f2: calc(var(--f1) / 2);
+        --f3: calc(var(--f2) / 2);
+        --f4: calc(var(--f3) / 2);
+        --f5: calc(var(--f4) / 2);
+        --black: #1c1c1c;
+        --white: #fcfcfc;
+        --gray: #e2e2e2;
+        --mid-gray: #6e6e6e;
+        background-color: var(--white);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        color: var(--mid-gray);
+      }
+      h1 {
+        margin-top: var(--f3);
+        margin-bottom: var(--f2);
+        text-align: center;
+        font-size: var(--f1);
+      }
+      form {
+        width: calc(4 * var(--f1));
+        margin: 0 auto;
+        font-size: var(--f3);
+        display: flex;
+        flex-direction: column;
+        gap: var(--f4);
+      }
+      .lane {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--f4);
+      }
+      .text {
+        flex-grow: 1;
+        width: 10%;
+        font-size: var(--f3);
+      }
+      .submit {
+        margin: var(--f4) 0;
+        flex-grow: 1;
+        width: auto;
+        border: none;
+        font-size: var(--f3);
+        background-color: var(--gray);
+        box-shadow: var(--f5) var(--f5) var(--mid-gray);
+      }
+      .submit:hover {
+        background-color: var(--mid-gray);
+        color: var(--white);
+        box-shadow: none;
+      }
+      footer {
+        margin-top: var(--f4);
+        text-align: center;
+        font-size: var(--f5);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>「<span style="color: var(--black)">敲黑板</span>」</h1>
+    <form action="http://localhost:5000/create" method="post">
+      <div class="lane">
+        <label for="name">名为</label>
+        <input class="text" type="text" name="name" />
+      </div>
+      <div class="lane">
+        <label for="author">作者</label>
+        <input class="text" type="text" name="author" />
+      </div>
+      <input class="submit" type="submit" value="创建" />
+    </form>
+    <footer>
+      <p>© 2024 <a href="https://git.tsinghua.edu.cn/a-bag-of-awesome-teeth/blackboard">一袋好牙队</a></p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script>
+      // MathJax Config
+      MathJax = {
+        chtml: {
+          displayAlign: "left",
+        },
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        svg: {
+          fontCache: "global",
+        },
+      };
+      const Info = {
+        user_id: "{{user}}",
+        room_id: "{{url}}",
+        room_name: "{{name}}",
+      };
+    </script>
+    <script
+      id="MathJax-script"
+      src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    ></script>
+    <title>大概是公式机器</title>
+    <script type="module" crossorigin src="/static/index-CH27GBy8.js"></script>
+    <link rel="stylesheet" crossorigin href="/static/index-CVu1rnPH.css" />
+  </head>
+  <body x-data="App" :style="`--my-color: ${colorFromId(user_id)}`">
+    <main style="grid-template-columns: 1fr min(100vw, 36rem) 1fr">
+      <div class="search" x-data="SearchBar" style="grid-column: 2/3">
+        <input
+          class="search__input"
+          type="text"
+          x-model="filter"
+          @input.debounce.300="setFiltered"
+        />
+        <div class="search__list">
+          <template x-for="entry in filtered" :key="entry.time">
+            <div
+              class="entry"
+              :class="isDraft && 'entry--draft'"
+              x-data="Entry(entry)"
+              :style="`--user-color: ${color}`"
+            >
+              <div
+                class="entry__container"
+                x-data="{showText: false}"
+                @click="showText=true"
+                @touchstart.passive="showText=true"
+              >
+                <div class="entry__status">
+                  <span x-text="name">name here</span>@
+                  <span x-text="editor">Editor here</span>:
+                  <time x-text="time"></time>
+                </div>
+                <div
+                  class="entry__content content"
+                  x-html="html"
+                  x-init="$nextTick(() => typesetEl($el))"
+                ></div>
+                <textarea
+                  x-data="{
+                    resize(){$el.style.height, $el.scrollHeight);$el.style.height=$el.scrollHeight+5+'px'},
+                  }"
+                  x-init="setTimeout(resize, 25);$watch('showText', () => {setTimeout(resize, 25);});$watch('text', () => {setTimeout(resize, 25);})"
+                  x-cloak
+                  x-show="showText"
+                  x-text="text"
+                  readonly
+                  style="
+                    width: calc(100% - var(--f5));
+                    resize: none;
+                    background-color: var(--white);
+                  "
+                ></textarea>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <div x-data="{open: false}" class="user-list">
+        <ul x-show="open" class="user-list__list">
+          <template x-for="user in users">
+            <li :style="`color:${user.color};`">
+              @<span
+                :style="user.id == user_id && 'text-decoration: wavy underline'"
+                x-text="user.name"
+              ></span>
+            </li>
+          </template>
+        </ul>
+        <button @click="open=!open" class="user-list__button">
+          <span x-text="open?'»':'«'">«</span>
+          <span x-text="users.length"></span> Users #<span
+            x-text="room_name"
+          ></span>
+        </button>
+      </div>
+    </footer>
+  </body>
+</html>
